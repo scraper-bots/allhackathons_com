@@ -243,39 +243,54 @@ The **2020 surge** (post-COVID) didn't reverse - it permanently expanded the hac
 
 ---
 
-## 🌍 Location Types: The Hybrid Reality
+## 🌍 Global Reach & Geographic Distribution
 
-![Location Types](charts/04_location_types.png)
+![Geographic Distribution](charts/04_geographic_distribution.png)
 
 ### Distribution Analysis
 
-While the current dataset shows classification opportunities, the broader trend is clear:
+| Metric | Count | Percentage |
+|--------|-------|------------|
+| **Online Hackathons** | 27 | 30.3% |
+| **In-Person Hackathons** | 62 | 69.7% |
+| **Countries Represented** | 16 | Global reach |
+| **Cities Represented** | 26 | Diverse locations |
 
-**The Future is Hybrid**
-- Remote hackathons broke geographic barriers (post-2020)
-- In-person events create networking and team bonding
-- Hybrid models maximize accessibility + engagement
+### Top Geographic Hubs
 
-### 💡 Key Insight: Remote Revolution
+**Leading Countries:**
+1. United States (12 hackathons)
+2. India (6 hackathons)
+3. United Kingdom (2 hackathons)
 
-The "remote" theme we analyzed has **89 hackathons** - a category that barely existed pre-2019. This represents a fundamental shift in how hackathons operate and who can participate.
+**Popular Cities:**
+- San Francisco, California (6 events) - Tech hub dominance
+- Bengaluru, India (2 events) - Emerging tech center
+- Berlin, Germany (2 events) - European innovation hub
+
+### 💡 Key Insight: Online Accessibility Revolution
+
+While **30.3% of hackathons are fully online**, enabling global participation without geographic barriers, the majority (69.7%) remain in-person, highlighting the continued value of face-to-face collaboration. The data spans **16 countries and 26 cities**, demonstrating true global reach.
 
 ### 🎯 Strategic Implications
 
 **For Participants:**
-- **Global Access**: No longer limited by geography
-- **Cost Savings**: No travel/accommodation expenses
-- **Time Flexibility**: Asynchronous participation options
+- **Global Access**: 30% of events accessible from anywhere
+- **Geographic Diversity**: Opportunities across 16 countries
+- **Hub Strategy**: Focus on tech cities (SF, Bengaluru, Berlin) for in-person events
+- **Cost Optimization**: Online events eliminate travel expenses
 
 **For Organizers:**
-- **Wider Reach**: International participants
-- **Lower Costs**: No venue/catering overhead
-- **Scale**: Can support 500+ vs 100 in-person
+- **Format Decision**: 70% choose in-person for networking value
+- **Location Matters**: Tech hubs attract more participants and sponsors
+- **Hybrid Opportunity**: Combine in-person + online for maximum reach
+- **International Appeal**: 16-country spread shows global demand
 
 **For Sponsors:**
-- **Extended Visibility**: Online reach > physical venue
-- **Data Collection**: Better tracking of engagement
-- **Global Branding**: International participant exposure
+- **Geographic Targeting**: Focus on key markets (US, India, UK)
+- **Online ROI**: 30% of events offer global brand exposure
+- **Local Activation**: In-person events in tech hubs = direct engagement
+- **Market Expansion**: Use hackathons to enter new geographic markets
 
 ---
 
@@ -577,7 +592,7 @@ allhackathons_com/
     ├── 01_theme_popularity.png
     ├── 02_yearly_trends.png
     ├── 03_monthly_distribution.png
-    ├── 04_location_types.png
+    ├── 04_geographic_distribution.png
     ├── 05_theme_combinations.png
     ├── 06_dashboard.png
     └── insights_report.txt
@@ -605,7 +620,7 @@ scraper.scrape_theme('blockchain', save_file='blockchain_hackathons.json')
 # Filter and analyze
 upcoming_ml = filter_hackathons(data, status='Upcoming', theme='machine-learning')
 with_prizes = filter_hackathons(data, has_prizes=True)
-online_only = filter_hackathons(data, location_type='ONLINE')
+beginner_friendly = filter_hackathons(data, theme='beginner')
 ```
 
 #### Generate Custom Charts

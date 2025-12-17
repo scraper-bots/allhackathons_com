@@ -87,10 +87,10 @@ class HackathonVisualizer:
         insights['peak_months'] = self._plot_monthly_distribution(output_dir)
         insights['charts_generated'].append('03_monthly_distribution.png')
 
-        # 4. Location Type Distribution
-        print("  4. Location type chart...")
-        insights['location_insights'] = self._plot_location_types(output_dir)
-        insights['charts_generated'].append('04_location_types.png')
+        # 4. Geographic Distribution
+        print("  4. Geographic distribution chart...")
+        insights['geographic_insights'] = self._plot_geographic_distribution(output_dir)
+        insights['charts_generated'].append('04_geographic_distribution.png')
 
         # 5. Theme Combinations
         print("  5. Theme combinations chart...")
@@ -197,48 +197,109 @@ class HackathonVisualizer:
             'slowest_month': monthly_data.idxmin()
         }
 
-    def _plot_location_types(self, output_dir):
-        """Plot location type distribution"""
-        # Count location types from original data (more accurate)
-        location_counter = Counter()
+    def _plot_geographic_distribution(self, output_dir):
+        """Plot geographic distribution and online vs in-person split"""
+        # Analyze locations
+        online_count = 0
+        in_person_count = 0
+        countries = Counter()
+        cities = Counter()
+
         for h in self.hackathons:
-            loc_type = h.get('location_type', 'Unknown')
-            if loc_type:
-                location_counter[loc_type] += 1
+            location = h.get('location', '').strip()
 
-        if not location_counter:
-            location_counter['Unknown'] = len(self.hackathons)
+            if location.lower() == 'online':
+                online_count += 1
+            elif location.lower() == 'in-person' or location:
+                in_person_count += 1
+                # Extract country/city info
+                if location.lower() != 'in-person':
+                    parts = [p.strip() for p in location.split(',')]
+                    if len(parts) >= 2:
+                        country = parts[-1]
+                        city = parts[0]
+                        countries[country] += 1
+                        cities[city] += 1
+                    elif len(parts) == 1:
+                        countries[parts[0]] += 1
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10))
 
-        # Pie chart
-        colors = sns.color_palette("Set2", len(location_counter))
+        # 1. Online vs In-Person Pie Chart
+        format_data = [online_count, in_person_count]
+        format_labels = ['Online', 'In-Person']
+        colors1 = ['#2E86AB', '#A23B72']
         wedges, texts, autotexts = ax1.pie(
-            location_counter.values(),
-            labels=location_counter.keys(),
+            format_data,
+            labels=format_labels,
             autopct='%1.1f%%',
             startangle=90,
-            colors=colors,
-            textprops={'fontweight': 'bold', 'fontsize': 11}
+            colors=colors1,
+            textprops={'fontweight': 'bold', 'fontsize': 12}
         )
-        ax1.set_title('Hackathon Location Types', fontsize=14, fontweight='bold', pad=20)
+        ax1.set_title('Online vs In-Person Distribution', fontsize=14, fontweight='bold', pad=20)
 
-        # Bar chart
-        bars = ax2.bar(range(len(location_counter)), location_counter.values(), color=colors)
-        ax2.set_xticks(range(len(location_counter)))
-        ax2.set_xticklabels(location_counter.keys(), rotation=45, ha='right')
-        ax2.set_ylabel('Count', fontsize=12, fontweight='bold')
-        ax2.set_title('Location Type Distribution', fontsize=14, fontweight='bold', pad=20)
+        # 2. Top Countries
+        top_countries = countries.most_common(10)
+        if top_countries:
+            country_names, country_counts = zip(*top_countries)
+            bars = ax2.barh(range(len(country_names)), country_counts,
+                           color=sns.color_palette("viridis", len(country_names)))
+            ax2.set_yticks(range(len(country_names)))
+            ax2.set_yticklabels(country_names)
+            ax2.set_xlabel('Number of Hackathons', fontsize=10, fontweight='bold')
+            ax2.set_title('Top 10 Countries', fontsize=14, fontweight='bold', pad=20)
+            ax2.invert_yaxis()
+            for i, count in enumerate(country_counts):
+                ax2.text(count + 0.1, i, str(count), va='center', fontsize=9, fontweight='bold')
 
-        # Add value labels
-        for i, (bar, count) in enumerate(zip(bars, location_counter.values())):
-            ax2.text(i, count + 0.5, str(count), ha='center', fontweight='bold')
+        # 3. Top Cities
+        top_cities = cities.most_common(10)
+        if top_cities:
+            city_names, city_counts = zip(*top_cities)
+            bars = ax3.barh(range(len(city_names)), city_counts,
+                           color=sns.color_palette("mako", len(city_names)))
+            ax3.set_yticks(range(len(city_names)))
+            ax3.set_yticklabels(city_names, fontsize=9)
+            ax3.set_xlabel('Number of Hackathons', fontsize=10, fontweight='bold')
+            ax3.set_title('Top 10 Cities', fontsize=14, fontweight='bold', pad=20)
+            ax3.invert_yaxis()
+            for i, count in enumerate(city_counts):
+                ax3.text(count + 0.1, i, str(count), va='center', fontsize=9, fontweight='bold')
+
+        # 4. Format Distribution Stats
+        ax4.axis('off')
+        stats_text = f"""
+        GLOBAL REACH STATISTICS
+
+        Total Hackathons: {len(self.hackathons)}
+
+        Format Split:
+        • Online: {online_count} ({online_count/len(self.hackathons)*100:.1f}%)
+        • In-Person: {in_person_count} ({in_person_count/len(self.hackathons)*100:.1f}%)
+
+        Geographic Coverage:
+        • Countries: {len(countries)}
+        • Cities: {len(cities)}
+
+        Accessibility:
+        {'🌍 Global reach via online format' if online_count > in_person_count else '🏢 Primarily in-person events'}
+        """
+        ax4.text(0.1, 0.5, stats_text, fontsize=11, verticalalignment='center',
+                fontfamily='monospace', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.3))
 
         plt.tight_layout()
-        plt.savefig(f'{output_dir}/04_location_types.png', dpi=300, bbox_inches='tight')
+        plt.savefig(f'{output_dir}/04_geographic_distribution.png', dpi=300, bbox_inches='tight')
         plt.close()
 
-        return dict(location_counter)
+        return {
+            'online_count': online_count,
+            'in_person_count': in_person_count,
+            'online_percentage': round(online_count/len(self.hackathons)*100, 1),
+            'countries': len(countries),
+            'cities': len(cities),
+            'top_country': countries.most_common(1)[0] if countries else ('Unknown', 0)
+        }
 
     def _plot_theme_combinations(self, output_dir):
         """Plot theme combinations"""
@@ -340,25 +401,28 @@ class HackathonVisualizer:
         ax5.set_title('Yearly Trends', fontweight='bold', fontsize=12)
         ax5.grid(True, alpha=0.3)
 
-        # 6. Location Types
+        # 6. Online vs In-Person Split
         ax6 = fig.add_subplot(gs[2, 2])
-        location_counter = Counter()
+        online_count = 0
+        in_person_count = 0
         for h in self.hackathons:
-            loc_type = h.get('location_type', 'Unknown')
-            if loc_type:
-                location_counter[loc_type] += 1
-        if not location_counter:
-            location_counter['Unknown'] = len(self.hackathons)
-        colors = sns.color_palette("Set2", len(location_counter))
-        wedges, texts, autotexts = ax6.pie(
-            location_counter.values(),
-            labels=location_counter.keys(),
-            autopct='%1.1f%%',
-            startangle=90,
-            colors=colors,
-            textprops={'fontsize': 9, 'fontweight': 'bold'}
-        )
-        ax6.set_title('Location Types', fontweight='bold', fontsize=12)
+            location = h.get('location', '').strip().lower()
+            if location == 'online':
+                online_count += 1
+            elif location:
+                in_person_count += 1
+
+        if online_count + in_person_count > 0:
+            colors = ['#2E86AB', '#A23B72']
+            wedges, texts, autotexts = ax6.pie(
+                [online_count, in_person_count],
+                labels=['Online', 'In-Person'],
+                autopct='%1.1f%%',
+                startangle=90,
+                colors=colors,
+                textprops={'fontsize': 9, 'fontweight': 'bold'}
+            )
+        ax6.set_title('Format Distribution', fontweight='bold', fontsize=12)
 
         fig.suptitle('Hackathon Data Dashboard', fontsize=18, fontweight='bold', y=0.98)
         plt.savefig(f'{output_dir}/06_dashboard.png', dpi=300, bbox_inches='tight')
@@ -397,12 +461,14 @@ class HackathonVisualizer:
             report.append(f"  Slowest Month: {monthly['slowest_month']}")
             report.append("")
 
-        if 'location_insights' in insights:
-            report.append("🌍 LOCATION DISTRIBUTION")
+        if 'geographic_insights' in insights:
+            geo = insights['geographic_insights']
+            report.append("🌍 GEOGRAPHIC DISTRIBUTION")
             report.append("-" * 70)
-            for loc_type, count in insights['location_insights'].items():
-                percentage = (count / insights['total_hackathons']) * 100
-                report.append(f"  {loc_type}: {count} ({percentage:.1f}%)")
+            report.append(f"  Online: {geo['online_count']} ({geo['online_percentage']}%)")
+            report.append(f"  In-Person: {geo['in_person_count']}")
+            report.append(f"  Countries Represented: {geo['countries']}")
+            report.append(f"  Cities Represented: {geo['cities']}")
             report.append("")
 
         report.append("💡 KEY INSIGHTS")
@@ -440,14 +506,11 @@ class HackathonVisualizer:
             insights_text.append(f"  3. {monthly['peak_month']} is the busiest month for hackathons,")
             insights_text.append(f"     while {monthly['slowest_month']} sees the least activity.")
 
-        # Location insights
-        if 'location_insights' in insights:
-            online_count = insights['location_insights'].get('ONLINE', 0)
-            total = insights['total_hackathons']
-            if online_count > 0:
-                online_pct = (online_count / total) * 100
-                insights_text.append(f"  4. Online hackathons make up {online_pct:.1f}% of events,")
-                insights_text.append(f"     increasing accessibility for global participants.")
+        # Geographic insights
+        if 'geographic_insights' in insights:
+            geo = insights['geographic_insights']
+            insights_text.append(f"  4. {geo['online_percentage']}% of hackathons are online, spanning")
+            insights_text.append(f"     {geo['countries']} countries and increasing global accessibility.")
 
         return "\n".join(insights_text)
 

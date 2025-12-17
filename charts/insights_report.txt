@@ -22,9 +22,12 @@ HACKATHON DATA INSIGHTS REPORT
   Busiest Month: Sept (14 hackathons)
   Slowest Month: Dec
 
-🌍 LOCATION DISTRIBUTION
+🌍 GEOGRAPHIC DISTRIBUTION
 ----------------------------------------------------------------------
-  Unknown: 89 (100.0%)
+  Online: 27 (30.3%)
+  In-Person: 62
+  Countries Represented: 16
+  Cities Represented: 26
 
 💡 KEY INSIGHTS
 ----------------------------------------------------------------------
@@ -34,13 +37,15 @@ HACKATHON DATA INSIGHTS REPORT
      a growing trend overall.
   3. Sept is the busiest month for hackathons,
      while Dec sees the least activity.
+  4. 30.3% of hackathons are online, spanning
+     16 countries and increasing global accessibility.
 
 📁 Generated Charts:
 ----------------------------------------------------------------------
   ✓ 01_theme_popularity.png
   ✓ 02_yearly_trends.png
   ✓ 03_monthly_distribution.png
-  ✓ 04_location_types.png
+  ✓ 04_geographic_distribution.png
   ✓ 05_theme_combinations.png
   ✓ 06_dashboard.png
 
